@@ -102,12 +102,14 @@
             <p class="text-slate-400 mb-8 text-sm">Registro de Operario Tecnológico</p>
             
             <div class="space-y-4">
-                <div class="flex gap-2">
-                    <input type="text" id="student-name" class="input-dark flex-1 p-4 rounded-xl" placeholder="Nombre">
-                    <input type="text" id="student-surname" class="input-dark flex-1 p-4 rounded-xl" placeholder="Apellido">
+                <!-- Se corrigió la alineación del nombre y apellido aquí -->
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="student-name" class="input-dark w-full p-4 rounded-xl" placeholder="Nombre">
+                    <input type="text" id="student-surname" class="input-dark w-full p-4 rounded-xl" placeholder="Apellido">
                 </div>
-                <div class="flex gap-2">
-                    <select id="student-course" class="input-dark flex-1 p-4 rounded-xl appearance-none">
+                <!-- Se corrigió la alineación del curso y turno aquí -->
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="student-course" class="input-dark w-full p-4 rounded-xl appearance-none">
                         <option value="" disabled selected>Año/Div</option>
                         <option value="1º 1">1º 1</option>
                         <option value="1º 2">1º 2</option>
@@ -116,7 +118,7 @@
                         <option value="1º 5">1º 5</option>
                         <option value="1º 6">1º 6</option>
                     </select>
-                    <select id="student-shift" class="input-dark flex-1 p-4 rounded-xl appearance-none">
+                    <select id="student-shift" class="input-dark w-full p-4 rounded-xl appearance-none">
                         <option value="" disabled selected>Turno</option>
                         <option value="TM">Turno Mañana</option>
                         <option value="TT">Turno Tarde</option>
@@ -252,7 +254,7 @@
     <script>
         const DOCENTE_KEY = "1304";
         let user = null;
-        let database = []; // En un entorno real, esto iría a Firebase/Firestore.
+        let database = []; // Simulación de base de datos local
 
         const phaseData = [
             {
@@ -330,8 +332,6 @@
 
             const userId = `${name}_${surname}_${course}_${shift}`.toLowerCase();
             
-            // Si el usuario vuelve a entrar, buscamos si ya tenía progreso (simulado aquí con filter en database)
-            // En una app real, cargaríamos el objeto 'user' desde la nube.
             user = { 
                 id: userId,
                 name, 
@@ -341,7 +341,6 @@
                 unlocked: 1 
             };
             
-            // "Borrar anterior": Si el usuario ya existía en la base de datos de esta sesión, lo limpiamos
             database = database.filter(entry => entry.studentId !== userId);
 
             document.getElementById('display-user').innerText = `Agente: ${name} ${surname} | ${user.course}`;
@@ -412,7 +411,6 @@
             const currentIdx = user.unlocked - 1;
             const data = phaseData[currentIdx];
             
-            // Registro en la base del docente
             database.unshift({
                 studentId: user.id,
                 student: `${user.name} ${user.surname}`,
@@ -421,7 +419,7 @@
                 phaseTitle: data.title,
                 text: input,
                 time: new Date().toLocaleTimeString(),
-                status: "Auto-Validado" // Corrección automática básica
+                status: "Auto-Validado"
             });
 
             user.xp += data.reward;
@@ -447,7 +445,6 @@
             });
         }
 
-        // Panel Docente
         function toggleAdmin() {
             document.getElementById('admin-modal').classList.toggle('hidden');
             document.getElementById('admin-auth').classList.remove('hidden');
@@ -477,7 +474,6 @@
                 return;
             }
 
-            // Agrupar por curso
             const courseGroups = {};
             database.forEach(entry => {
                 if (!courseGroups[entry.course]) courseGroups[entry.course] = [];
