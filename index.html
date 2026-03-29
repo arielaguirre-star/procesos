@@ -3,22 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesor TecnoBot - Estación de Producción</title>
+    <title>Profesor Tecnológico - Estación Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tecnobot-percha-1';
+        // ================================================================
+        // 🛠️ CONFIGURACIÓN DE TU BASE DE DATOS (REEMPLAZA ESTO)
+        // ================================================================
+        // Ve a console.firebase.google.com -> Configuración del proyecto
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYKZzFVglqVpje7E9Xz9LD-3LrZlZkUeM",
+            authDomain: "procesos-27513.firebaseapp.com",
+            projectId: "procesos-27513",
+            storageBucket: "procesos-27513.firebasestorage.app",
+            messagingSenderId: "842214104941",
+            appId: "1:842214104941:web:a5c7592ef6df047d1e8464"
+        };
+        // ================================================================
 
-        // Variables globales para la app
+        // Inicialización protegida
+        let app, auth, db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        } catch (e) {
+            console.error("Error inicializando Firebase:", e);
+        }
+
+        const appId = "proyecto-percha-v1"; // Identificador único de tu trabajo
+
         window.db = db;
         window.auth = auth;
         window.appId = appId;
@@ -28,231 +47,106 @@
         window.doc = doc;
         window.setDoc = setDoc;
 
-        // REGLA 3: Autenticación con Token prioritario antes de cualquier consulta
-        const initAuth = async () => {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                console.log("Autenticación exitosa");
-            } catch (error) {
-                console.error("Error crítico de auth:", error);
-            }
-        };
-
-        initAuth();
-
-        // Escuchar cambios de estado para habilitar la app
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                window.currentUser = user;
-                console.log("Usuario listo:", user.uid);
-            }
-        });
+        // Autenticación Anónima (Asegúrate de activarla en la consola de Firebase > Auth)
+        signInAnonymously(auth).catch(err => console.error("Error Auth:", err));
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
-        
-        :root {
-            --neon-blue: #00f2ff;
-            --neon-purple: #bc13fe;
-            --dark-bg: #050508;
-            --card-bg: rgba(15, 15, 25, 0.9);
-        }
-
-        body { 
-            font-family: 'Space Grotesk', sans-serif; 
-            background-color: var(--dark-bg);
-            color: #e2e8f0;
-            overflow-x: hidden;
-        }
-
-        .glass-panel {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
-        }
-
-        .phase-card {
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .phase-card:not(.locked):hover {
-            transform: translateY(-5px);
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px rgba(0, 242, 255, 0.15);
-        }
-
-        .locked {
-            filter: grayscale(1) opacity(0.3);
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .tech-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            opacity: 0.15;
-            object-fit: cover;
-        }
-
-        .input-dark {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            transition: all 0.3s;
-        }
-
-        .input-dark:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
-            outline: none;
-        }
-
-        @keyframes pulse-neon {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .status-active { animation: pulse-neon 2s infinite; }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
+        :root { --neon-blue: #00f2ff; --dark-bg: #050508; --card-bg: rgba(15, 15, 25, 0.9); }
+        body { font-family: 'Space Grotesk', sans-serif; background-color: var(--dark-bg); color: #e2e8f0; }
+        .glass-panel { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .phase-card { transition: all 0.3s ease; }
+        .locked { filter: grayscale(1) opacity(0.3); cursor: not-allowed; }
+        .tech-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1; object-fit: cover; }
+        .input-dark { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); color: white; border-radius: 12px; }
+        .input-dark:focus { border-color: var(--neon-blue); outline: none; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80" alt="Informática Avanzada Background" class="tech-bg">
+    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80" class="tech-bg">
 
-    <!-- Pantalla de Inicio / Registro -->
+    <!-- Pantalla de Login -->
     <div id="login-screen" class="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-md">
-        <div class="glass-panel w-full max-w-lg p-8 md:p-12 rounded-3xl text-center border-cyan-500/30">
-            <div class="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+        <div class="glass-panel w-full max-w-lg p-10 rounded-3xl text-center border-cyan-500/20">
+            <div class="w-16 h-16 bg-cyan-500/10 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto mb-6 text-2xl border border-cyan-500/20">
                 <i class="fas fa-microchip"></i>
             </div>
-            <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter italic">InventoBot 2.0</h2>
-            <p class="text-slate-400 mb-8 text-xs tracking-widest uppercase italic">Sistema de Gestión en la Nube</p>
+            <h2 class="text-3xl font-black mb-1 uppercase italic tracking-tighter">InventoBot 2.0</h2>
+            <p class="text-slate-500 mb-8 text-[9px] tracking-[0.4em] uppercase font-bold">Protocolo de Educación Tecnológica</p>
             
             <div class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="student-name" class="input-dark w-full p-4 rounded-xl text-sm" placeholder="Nombre">
-                    <input type="text" id="student-surname" class="input-dark w-full p-4 rounded-xl text-sm" placeholder="Apellido">
-                </div>
-                
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="student-course" class="input-dark w-full p-4 rounded-xl appearance-none text-sm">
-                        <option value="" disabled selected>Año/Div</option>
-                        <option value="1º 1">1º 1</option><option value="1º 2">1º 2</option>
-                        <option value="1º 3">1º 3</option><option value="1º 4">1º 4</option>
-                        <option value="1º 5">1º 5</option><option value="1º 6">1º 6</option>
+                    <input type="text" id="student-name" class="input-dark p-4 text-sm" placeholder="Nombre">
+                    <input type="text" id="student-surname" class="input-dark p-4 text-sm" placeholder="Apellido">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <select id="student-course" class="input-dark p-4 text-sm appearance-none">
+                        <option value="" disabled selected>Curso</option>
+                        <option>1º 1</option><option>1º 2</option><option>1º 3</option>
+                        <option>1º 4</option><option>1º 5</option><option>1º 6</option>
                     </select>
-                    <select id="student-shift" class="input-dark w-full p-4 rounded-xl appearance-none text-sm">
+                    <select id="student-shift" class="input-dark p-4 text-sm appearance-none">
                         <option value="" disabled selected>Turno</option>
                         <option value="TM">Mañana</option><option value="TT">Tarde</option>
                     </select>
                 </div>
-
-                <button onclick="login()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-4 rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-cyan-500/20 text-sm">
-                    Acceso Biométrico
+                <button onclick="login()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-4 rounded-xl uppercase tracking-widest transition-all shadow-lg shadow-cyan-500/20">Ingresar al Sistema</button>
+                
+                <!-- Botón de acceso docente oculto (sin el número 1304) -->
+                <button onclick="toggleAdmin()" class="text-slate-700 hover:text-slate-500 text-[9px] uppercase font-bold pt-4 transition-colors">
+                    <i class="fas fa-shield-alt mr-1"></i> Acceso Restringido
                 </button>
-
-                <div class="pt-6 border-t border-white/5">
-                    <button onclick="toggleAdmin()" class="text-slate-500 hover:text-cyan-400 text-[10px] uppercase font-bold tracking-widest transition-colors">
-                        <i class="fas fa-lock mr-2"></i> Acceso Docente (1304)
-                    </button>
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Interfaz Principal -->
+    <!-- UI Principal -->
     <div id="main-ui" class="hidden">
         <nav class="sticky top-0 z-50 glass-panel px-6 py-4 border-b border-white/10">
             <div class="container mx-auto flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="bg-cyan-600 p-2 rounded-lg text-white">
-                        <i class="fas fa-satellite-dish"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xs font-bold tracking-widest uppercase">Misión: <span class="text-cyan-400 italic">Percha Maker</span></h1>
-                        <p id="display-user" class="text-[9px] text-slate-400 italic font-mono uppercase">ID_CLOUD: CONECTANDO...</p>
-                    </div>
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-network-wired text-cyan-400"></i>
+                    <h1 class="text-xs font-bold tracking-widest uppercase">Misión: <span class="text-cyan-400 italic">Percha Maker</span></h1>
                 </div>
-                <div class="bg-cyan-400/10 text-cyan-400 px-4 py-2 rounded-xl border border-cyan-400/30 font-mono text-sm">
-                    <span id="xp-counter">0000</span> XP
-                </div>
+                <div id="xp-display" class="bg-cyan-400/10 text-cyan-400 px-4 py-1 rounded-full border border-cyan-400/30 font-mono text-xs">0000 XP</div>
             </div>
         </nav>
 
         <main class="container mx-auto px-4 py-12">
-            <header class="text-center mb-16">
-                <h2 class="text-4xl font-black mb-4 uppercase tracking-tighter text-white">Fases de <span class="text-cyan-400">Producción</span></h2>
-                <div class="max-w-xs mx-auto mb-4">
-                    <div class="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-1">
-                        <span>Progreso Digital</span>
-                        <span id="progress-percent">0%</span>
-                    </div>
-                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
-                        <div id="xp-bar" class="bg-cyan-400 h-full transition-all duration-700" style="width: 0%"></div>
-                    </div>
+            <div id="phases-grid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"></div>
+            
+            <div id="mission-area" class="hidden glass-panel rounded-3xl p-8 border border-cyan-400/30 max-w-4xl mx-auto shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h4 id="mission-title" class="text-xl font-bold text-white uppercase italic"></h4>
+                    <span id="badge-display" class="text-[9px] bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full border border-purple-500/30 font-bold uppercase tracking-widest">Insignia Pendiente</span>
                 </div>
-            </header>
-
-            <div id="phases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20"></div>
-
-            <div id="mission-area" class="hidden glass-panel rounded-3xl p-8 border border-cyan-400/30 mb-20 shadow-[0_0_50px_rgba(0,242,255,0.1)]">
-                <div class="flex flex-col gap-6">
-                    <span id="mission-step" class="text-cyan-400 font-mono text-[10px] font-bold px-3 py-1 bg-cyan-400/10 rounded-full border border-cyan-400/20 w-fit">FASE_XX</span>
-                    <h4 id="mission-title" class="text-2xl font-bold text-white uppercase italic">Título</h4>
-                    <div id="mission-content" class="text-slate-300 text-sm leading-relaxed"></div>
-                    
-                    <div class="bg-black/40 rounded-2xl p-6 border border-white/5">
-                        <div class="flex justify-between items-center mb-3">
-                            <h5 class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest"><i class="fas fa-robot mr-2"></i> Instrucción para IA</h5>
-                            <button onclick="copyPrompt()" class="text-[9px] bg-cyan-400 text-black px-3 py-1 rounded-lg font-bold">COPIAR</button>
-                        </div>
-                        <p id="mission-prompt" class="font-mono text-xs italic text-slate-400 bg-black/20 p-3 rounded-lg"></p>
-                    </div>
-
-                    <textarea id="user-input" class="w-full input-dark rounded-2xl p-6 h-40 text-sm" placeholder="Documenta tu investigación aquí..."></textarea>
-                    <button onclick="submitPhase()" id="submit-btn" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-4 rounded-xl transition-all text-sm uppercase shadow-lg shadow-cyan-500/20">
-                        Sincronizar Avance
-                    </button>
+                <p id="mission-content" class="text-slate-400 text-sm mb-6 leading-relaxed"></p>
+                <div class="bg-black/60 p-5 rounded-xl mb-6 text-[11px] font-mono text-slate-400 border border-white/5 relative group">
+                    <div class="text-cyan-500 text-[9px] font-bold uppercase mb-2">Orden para tu IA:</div>
+                    <span id="mission-prompt"></span>
+                    <button onclick="copyPrompt()" class="absolute top-4 right-4 bg-white/5 hover:bg-cyan-500 hover:text-black px-3 py-1 rounded text-[9px] font-bold transition-all border border-white/10">COPIAR COMANDO</button>
                 </div>
+                <textarea id="user-input" class="w-full input-dark p-6 h-40 text-sm mb-4 focus:ring-1 ring-cyan-500" placeholder="Escribe aquí los resultados de tu investigación y proceso técnico..."></textarea>
+                <button id="submit-btn" onclick="submitPhase()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-black font-black py-4 rounded-xl uppercase text-xs tracking-widest shadow-lg shadow-cyan-500/10">Sincronizar Avance</button>
             </div>
         </main>
     </div>
 
     <!-- Panel Docente -->
-    <div id="admin-modal" class="fixed inset-0 z-[300] hidden bg-black/98 flex items-center justify-center p-4 backdrop-blur-2xl">
-        <div class="glass-panel w-full max-w-5xl rounded-3xl p-8 max-h-[90vh] overflow-hidden flex flex-col border-cyan-500/20">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-bold text-white uppercase flex items-center gap-3"><i class="fas fa-shield-alt text-cyan-400"></i> Consola del Maestro</h3>
-                <button onclick="toggleAdmin()" class="text-slate-500 hover:text-white"><i class="fas fa-times"></i></button>
+    <div id="admin-modal" class="fixed inset-0 z-[300] hidden bg-black/98 flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-5xl rounded-3xl p-8 max-h-[85vh] overflow-hidden flex flex-col border-cyan-500/20">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-white font-bold uppercase text-sm tracking-widest"><i class="fas fa-id-card-alt mr-2 text-cyan-400"></i> Terminal de Monitoreo</h3>
+                <button onclick="toggleAdmin()" class="text-slate-500 hover:text-white transition-colors"><i class="fas fa-times text-xl"></i></button>
             </div>
-
-            <div id="admin-auth" class="text-center py-20">
-                <input type="password" id="admin-pass" class="input-dark text-center text-3xl p-4 w-48 font-bold rounded-xl" maxlength="4" placeholder="••••">
-                <button onclick="checkAdmin()" class="block mx-auto mt-6 px-8 py-3 bg-cyan-500 text-black font-bold rounded-lg uppercase text-xs">Entrar</button>
+            <div id="admin-auth" class="text-center py-10">
+                <p class="text-slate-500 text-[10px] uppercase font-bold mb-4">Ingrese Código de Seguridad</p>
+                <input type="password" id="admin-pass" class="input-dark text-center text-3xl p-4 w-44 rounded-xl mb-6 font-bold tracking-widest" maxlength="4" placeholder="••••">
+                <button onclick="checkAdmin()" class="block mx-auto bg-cyan-500 text-black px-10 py-3 rounded-xl font-black text-xs uppercase transition-all hover:bg-cyan-400">Desbloquear Terminal</button>
             </div>
-
-            <div id="admin-dashboard" class="hidden overflow-y-auto custom-scrollbar flex-1">
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
-                        <span class="text-[9px] text-slate-500 uppercase font-bold italic">Total Entregas</span>
-                        <p id="total-done" class="text-2xl font-black text-cyan-400">0</p>
-                    </div>
-                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
-                        <span class="text-[9px] text-slate-500 uppercase font-bold italic">Cursos Activos</span>
-                        <p id="total-courses" class="text-2xl font-black text-purple-400">0</p>
-                    </div>
-                </div>
-                <div id="admin-log" class="space-y-6"></div>
+            <div id="admin-dashboard" class="hidden overflow-y-auto pr-2 space-y-6">
+                <!-- Se llena dinámicamente -->
             </div>
         </div>
     </div>
@@ -260,200 +154,141 @@
     <script>
         const DOCENTE_KEY = "1304";
         let user = null;
-
         const phaseData = [
-            { step: "FASE_01", title: "Análisis del Problema", content: "¿Por qué se rompen las perchas? Analiza materiales reciclables.", prompt: "IA, como experto, ¿qué debilidades estructurales tiene una percha de plástico vs una de cartón?", reward: 100, icon: "fa-search", color: "rose" },
-            { step: "FASE_02", title: "Diseño Técnico", content: "Dibuja tu prototipo. ¿Qué medidas tendrá?", prompt: "IA, sugiere 3 formas de reforzar la parte superior de una percha de cartón para soportar 2kg.", reward: 150, icon: "fa-pencil-ruler", color: "cyan" },
-            { step: "FASE_03", title: "Planificación", content: "Lista materiales y pasos. Crea un diagrama de bloques.", prompt: "IA, crea un diagrama de bloques simplificado para la producción artesanal de una percha.", reward: 200, icon: "fa-list-ol", color: "amber" },
-            { step: "FASE_04", title: "Producción Maker", content: "Describe el proceso de armado y herramientas usadas.", prompt: "IA, ¿qué tipos de uniones mecánicas (sin pegamento) puedo usar para unir dos cartones de 4mm?", reward: 250, icon: "fa-hammer", color: "emerald" },
-            { step: "FASE_05", title: "Control de Calidad", content: "Prueba de carga. ¿Qué funcionó y qué falló?", prompt: "IA, mi percha se dobla por el medio. ¿Qué refuerzo interno me sugieres para mejorar la rigidez?", reward: 150, icon: "fa-vial", color: "purple" },
-            { step: "FASE_06", title: "Comunicación", content: "Marca y Eslogan. Impacto ambiental del proyecto.", prompt: "IA, crea una marca ecológica y un eslogan potente para un perchero hecho de materiales recuperados.", reward: 150, icon: "fa-bullhorn", color: "blue" }
+            { title: "Análisis", content: "Analiza por qué faltan perchas en el club y qué materiales reciclables podrías usar.", prompt: "IA, como experto tecnológico, ¿qué ventajas tiene el cartón corrugado sobre el plástico para una percha casera?", reward: 100 },
+            { title: "Diseño", content: "Dibuja tu diseño. ¿Cómo evitarás que la ropa se resbale?", prompt: "IA, sugiere 3 métodos para que una percha de cartón sea antideslizante usando materiales comunes.", reward: 150 },
+            { title: "Gestión", content: "Haz el listado de materiales y los pasos del proceso.", prompt: "IA, arma un diagrama de bloques para fabricar una percha: desde la materia prima hasta el acabado final.", reward: 200 },
+            { title: "Ejecución", content: "Construye tu percha. ¿Qué herramientas usaste y qué problemas tuviste?", prompt: "IA, si no tengo pegamento, ¿qué tipo de encastres puedo hacer en cartón para que la percha no se desarme?", reward: 250 },
+            { title: "Evaluación", content: "Prueba el peso. ¿Qué salió bien y qué falló estructuralmente?", prompt: "IA, mi percha se dobla con un abrigo pesado. ¿Cómo puedo reforzar la estructura sin añadir mucho peso?", reward: 150 },
+            { title: "Marca", content: "Crea un nombre y eslogan para tu invento sustentable.", prompt: "IA, crea un nombre pegadizo y un eslogan para mi marca de perchas ecológicas hechas por alumnos.", reward: 150 }
         ];
 
-        async function login() {
+        function login() {
             const name = document.getElementById('student-name').value.trim();
             const surname = document.getElementById('student-surname').value.trim();
             const course = document.getElementById('student-course').value;
             const shift = document.getElementById('student-shift').value;
+            if(!name || !surname || !course || !shift) return alert("Error: Datos incompletos.");
             
-            if (!name || !surname || !course || !shift) {
-                alert("Operario: Datos incompletos.");
-                return;
-            }
-
-            user = { 
-                id: `${name}_${surname}_${course}_${shift}`.toLowerCase().replace(/\s/g, '_'),
-                name, surname, course: `${course} ${shift}`, xp: 0, unlocked: 1 
-            };
-
-            document.getElementById('display-user').innerText = `ID_CLOUD: ${user.name} ${user.surname} | ${user.course}`;
+            user = { id: `${name}_${surname}_${course}_${shift}`.toLowerCase().replace(/\s/g,'_'), name, surname, course: `${course} ${shift}`, xp: 0, unlocked: 1 };
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-ui').classList.remove('hidden');
-            
             renderCards();
-            syncUserData();
+            startSync();
         }
 
-        function syncUserData() {
-            // REGLA 3: Verificar que el auth esté listo
-            if (!window.auth.currentUser) {
-                setTimeout(syncUserData, 500);
-                return;
-            }
-
+        function startSync() {
+            if(!window.db) return; 
             const q = window.query(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas'));
             window.onSnapshot(q, (snapshot) => {
-                const entries = snapshot.docs.map(doc => doc.data()).filter(e => e.studentId === user.id);
-                if (entries.length > 0) {
-                    user.unlocked = Math.max(...entries.map(e => e.phase)) + 1;
-                    user.xp = entries.reduce((acc, curr) => acc + curr.reward, 0);
-                    updateStats();
+                const data = snapshot.docs.map(doc => doc.data());
+                const myEntries = data.filter(e => e.studentId === user.id);
+                if(myEntries.length > 0) {
+                    user.unlocked = Math.max(...myEntries.map(e => e.phase)) + 1;
+                    user.xp = myEntries.reduce((acc, curr) => acc + curr.reward, 0);
+                    document.getElementById('xp-display').innerText = `${String(user.xp).padStart(4,'0')} XP`;
                     renderCards();
                 }
-            }, (err) => console.error("Error lectura:", err));
+            });
         }
 
         function renderCards() {
             const grid = document.getElementById('phases-grid');
             grid.innerHTML = "";
-            phaseData.forEach((data, index) => {
-                const phaseNum = index + 1;
-                const isLocked = phaseNum > user.unlocked;
-                const isDone = phaseNum < user.unlocked;
-                const card = document.createElement('div');
-                card.className = `phase-card glass-panel p-6 rounded-2xl border border-white/5 cursor-pointer flex flex-col justify-between ${isLocked ? 'locked' : ''}`;
-                card.onclick = () => !isLocked && openPhase(index);
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="text-${data.color}-400 text-xl"><i class="fas ${data.icon}"></i></div>
-                            <span class="text-[8px] font-mono text-slate-600">${data.step}</span>
+            phaseData.forEach((p, i) => {
+                const locked = (i + 1) > user.unlocked;
+                const done = (i + 1) < user.unlocked;
+                grid.innerHTML += `
+                    <div onclick="${!locked ? `openPhase(${i})` : ''}" class="glass-panel p-6 rounded-2xl border border-white/5 transition-all ${locked ? 'locked' : 'cursor-pointer hover:border-cyan-500/40 hover:translate-y-[-4px]'}">
+                        <div class="flex justify-between mb-4">
+                            <span class="text-[8px] font-mono text-slate-500">FASE_0${i+1}</span>
+                            <i class="fas ${done ? 'fa-check-circle text-emerald-500' : (locked ? 'fa-lock text-slate-700' : 'fa-bolt text-cyan-400')}"></i>
                         </div>
-                        <h3 class="text-xs font-bold text-white uppercase">${data.title}</h3>
-                    </div>
-                    <div class="mt-4 pt-3 border-t border-white/5 flex items-center justify-between">
-                        <span class="text-[8px] font-bold ${isDone ? 'text-emerald-400' : 'text-cyan-400'} uppercase">
-                            ${isDone ? 'Completado' : (isLocked ? 'Bloqueado' : 'Activo')}
-                        </span>
+                        <h5 class="text-xs font-bold text-white uppercase italic">${p.title}</h5>
+                        <p class="text-[9px] mt-3 font-black tracking-widest ${done ? 'text-emerald-500/50' : (locked ? 'text-slate-800' : 'text-cyan-400 status-active')}">
+                            ${done ? 'COMPLETADO' : (locked ? 'BLOQUEADO' : 'ACTIVADO')}
+                        </p>
                     </div>
                 `;
-                grid.appendChild(card);
             });
         }
 
-        function openPhase(index) {
-            const data = phaseData[index];
+        function openPhase(i) {
+            const p = phaseData[i];
             document.getElementById('mission-area').classList.remove('hidden');
-            document.getElementById('mission-step').innerText = data.step;
-            document.getElementById('mission-title').innerText = data.title;
-            document.getElementById('mission-content').innerText = data.content;
-            document.getElementById('mission-prompt').innerText = `"${data.prompt}"`;
+            document.getElementById('mission-title').innerText = `Fase ${i+1}: ${p.title}`;
+            document.getElementById('mission-content').innerText = p.content;
+            document.getElementById('mission-prompt').innerText = p.prompt;
             document.getElementById('user-input').value = "";
-            window.scrollTo({ top: document.getElementById('mission-area').offsetTop - 20, behavior: 'smooth' });
+            window.scrollTo({ top: document.getElementById('mission-area').offsetTop - 50, behavior: 'smooth' });
         }
 
         async function submitPhase() {
-            // REGLA 3: Guardia de autenticación
-            if (!window.auth.currentUser) {
-                alert("Iniciando conexión con la nube... espera un segundo y reintenta.");
-                return;
-            }
-
+            if(!window.db) return alert("Error: Base de datos no inicializada. Revisa tu Configuración.");
             const input = document.getElementById('user-input').value.trim();
-            if (input.length < 10) { alert("Documentación insuficiente."); return; }
-            
-            const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-            btn.innerText = "Sincronizando...";
+            if(input.length < 15) return alert("Documentación insuficiente. Explica mejor tu proceso.");
 
-            const currentIdx = user.unlocked - 1;
-            const data = phaseData[currentIdx];
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true; btn.innerText = "Sincronizando...";
 
             try {
-                // REGLA 1: Ruta estricta
                 const docId = `${user.id}_fase_${user.unlocked}`;
                 await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas', docId), {
-                    studentId: user.id,
-                    student: `${user.name} ${user.surname}`,
+                    studentId: user.id, 
+                    student: `${user.name} ${user.surname}`, 
                     course: user.course,
-                    phase: user.unlocked,
-                    phaseTitle: data.title,
-                    text: input,
-                    reward: data.reward,
+                    phase: user.unlocked, 
+                    text: input, 
+                    reward: phaseData[user.unlocked-1].reward, 
                     timestamp: Date.now()
                 });
-
                 document.getElementById('mission-area').classList.add('hidden');
-                alert("¡Fase guardada exitosamente!");
+                alert("¡Fase sincronizada con la nube!");
             } catch (e) {
-                console.error("Error guardado:", e);
-                alert("Error de conexión. Asegúrate de tener internet.");
+                alert("Error al guardar: Posiblemente faltan las Reglas de Escritura en Firebase o las credenciales son incorrectas.");
+                console.error(e);
             } finally {
-                btn.disabled = false;
-                btn.innerText = "Sincronizar Avance";
+                btn.disabled = false; btn.innerText = "Sincronizar Avance";
             }
         }
 
-        function updateStats() {
-            document.getElementById('xp-counter').innerText = String(user.xp).padStart(4, '0');
-            const percent = Math.round(((user.unlocked - 1) / 6) * 100);
-            document.getElementById('xp-bar').style.width = `${percent}%`;
-            document.getElementById('progress-percent').innerText = `${percent}%`;
+        function copyPrompt() { 
+            navigator.clipboard.writeText(document.getElementById('mission-prompt').innerText); 
+            alert("Comando copiado para tu IA."); 
         }
 
-        function copyPrompt() {
-            const text = document.getElementById('mission-prompt').innerText.replace(/"/g, '');
-            navigator.clipboard.writeText(text);
-            alert("Comando copiado.");
-        }
-
-        function toggleAdmin() {
-            document.getElementById('admin-modal').classList.toggle('hidden');
-            document.getElementById('admin-pass').value = "";
-        }
+        function toggleAdmin() { document.getElementById('admin-modal').classList.toggle('hidden'); }
 
         function checkAdmin() {
-            if (document.getElementById('admin-pass').value === DOCENTE_KEY) {
+            if(document.getElementById('admin-pass').value === DOCENTE_KEY) {
                 document.getElementById('admin-auth').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
-                startAdminMonitoring();
-            } else { alert("Acceso denegado."); }
+                loadAdminData();
+            } else alert("Acceso denegado.");
         }
 
-        function startAdminMonitoring() {
+        function loadAdminData() {
+            if(!window.db) return;
             const q = window.query(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas'));
             window.onSnapshot(q, (snapshot) => {
                 const data = snapshot.docs.map(doc => doc.data());
-                renderAdminLog(data);
-            }, (err) => console.error("Error docente:", err));
-        }
-
-        function renderAdminLog(data) {
-            const log = document.getElementById('admin-log');
-            document.getElementById('total-done').innerText = data.length;
-            const courses = [...new Set(data.map(d => d.course))].sort();
-            document.getElementById('total-courses').innerText = courses.length;
-
-            log.innerHTML = "";
-            courses.forEach(c => {
-                const section = document.createElement('div');
-                section.innerHTML = `<h4 class="text-cyan-400 font-bold text-[10px] uppercase border-b border-white/10 pb-1 mb-3">${c}</h4>`;
-                const grid = document.createElement('div');
-                grid.className = "grid gap-3";
-                data.filter(d => d.course === c).sort((a,b) => b.timestamp - a.timestamp).forEach(entry => {
-                    const row = document.createElement('div');
-                    row.className = "bg-white/5 p-3 rounded-lg border border-white/5 text-[11px]";
-                    row.innerHTML = `
-                        <div class="flex justify-between mb-1">
-                            <span class="text-white font-bold">${entry.student}</span>
-                            <span class="text-cyan-400 font-mono">Fase ${entry.phase}</span>
-                        </div>
-                        <p class="text-slate-400 italic">"${entry.text}"</p>
-                    `;
-                    grid.appendChild(row);
+                const dash = document.getElementById('admin-dashboard');
+                dash.innerHTML = "";
+                
+                const courses = [...new Set(data.map(d => d.course))].sort();
+                courses.forEach(c => {
+                    let html = `<div class="sticky top-0 bg-black/90 py-2 border-b border-cyan-500/30 mb-4 z-10"><h6 class="text-cyan-400 text-[10px] font-black uppercase tracking-widest italic">${c}</h6></div>`;
+                    data.filter(d => d.course === c).sort((a,b) => b.timestamp - a.timestamp).forEach(e => {
+                        html += `<div class="bg-white/5 p-4 rounded-xl mb-3 border border-white/5 hover:border-white/10 transition-all">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-white text-xs font-bold">${e.student}</span>
+                                <span class="text-[8px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded font-bold">FASE ${e.phase}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 italic leading-relaxed font-mono">"${e.text}"</p>
+                        </div>`;
+                    });
+                    dash.innerHTML += html;
                 });
-                section.appendChild(grid);
-                log.appendChild(section);
             });
         }
     </script>
