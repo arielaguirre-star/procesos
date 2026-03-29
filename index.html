@@ -6,6 +6,39 @@
     <title>Profesor TecnoBot - Estación de Producción</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuración de Firebase (Se inyecta automáticamente en el entorno)
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tecnobot-percha-1';
+
+        // Variables globales para la app
+        window.db = db;
+        window.auth = auth;
+        window.appId = appId;
+        window.collection = collection;
+        window.onSnapshot = onSnapshot;
+        window.query = query;
+        window.doc = doc;
+        window.setDoc = setDoc;
+
+        // Autenticación inicial obligatoria para usar Firestore
+        const initAuth = async () => {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Error de auth:", error);
+            }
+        };
+        initAuth();
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
         
@@ -20,6 +53,7 @@
             font-family: 'Space Grotesk', sans-serif; 
             background-color: var(--dark-bg);
             color: #e2e8f0;
+            overflow-x: hidden;
         }
 
         .glass-panel {
@@ -49,12 +83,12 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
-            opacity: 0.2;
+            opacity: 0.15;
             object-fit: cover;
         }
 
         .input-dark {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
             transition: all 0.3s;
@@ -71,45 +105,35 @@
             50% { opacity: 0.6; }
         }
 
-        .status-active {
-            animation: pulse-neon 2s infinite;
-        }
+        .status-active { animation: pulse-neon 2s infinite; }
         
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--neon-blue);
-            border-radius: 10px;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Imagen de fondo temática (Hardware/Informática) -->
-    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80" alt="Hardware de Computación" class="tech-bg">
+    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80" alt="Nano Banana Tech Background" class="tech-bg">
 
     <!-- Pantalla de Inicio / Registro -->
-    <div id="login-screen" class="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md">
-        <div class="glass-panel w-full max-w-md p-10 rounded-3xl text-center border-cyan-500/30">
-            <div class="w-20 h-20 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto mb-6 text-3xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
+    <div id="login-screen" class="fixed inset-0 z-[200] flex flex-col items-center justify-center p-6 bg-black/95 backdrop-blur-md">
+        <div class="glass-panel w-full max-w-lg p-8 md:p-12 rounded-3xl text-center border-cyan-500/30">
+            <div class="w-16 h-16 bg-cyan-500/20 rounded-2xl flex items-center justify-center text-cyan-400 mx-auto mb-6 text-2xl shadow-[0_0_20px_rgba(6,182,212,0.3)]">
                 <i class="fas fa-microchip"></i>
             </div>
-            <h2 class="text-3xl font-bold mb-2 uppercase tracking-tighter italic">InventoBot 1.0</h2>
-            <p class="text-slate-400 mb-8 text-sm">Registro de Operario Tecnológico</p>
+            <h2 class="text-3xl font-black mb-1 uppercase tracking-tighter italic">InventoBot 2.0</h2>
+            <p class="text-slate-400 mb-8 text-xs tracking-widest uppercase">Estación de Trabajo en la Nube</p>
             
             <div class="space-y-4">
-                <!-- Se corrigió la alineación del nombre y apellido aquí -->
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="student-name" class="input-dark w-full p-4 rounded-xl" placeholder="Nombre">
-                    <input type="text" id="student-surname" class="input-dark w-full p-4 rounded-xl" placeholder="Apellido">
+                <!-- Arreglo de Apellido fuera de cuadro -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="text" id="student-name" class="input-dark w-full p-4 rounded-xl text-sm" placeholder="Nombre">
+                    <input type="text" id="student-surname" class="input-dark w-full p-4 rounded-xl text-sm" placeholder="Apellido">
                 </div>
-                <!-- Se corrigió la alineación del curso y turno aquí -->
+                
                 <div class="grid grid-cols-2 gap-4">
-                    <select id="student-course" class="input-dark w-full p-4 rounded-xl appearance-none">
+                    <select id="student-course" class="input-dark w-full p-4 rounded-xl appearance-none text-sm">
                         <option value="" disabled selected>Año/Div</option>
                         <option value="1º 1">1º 1</option>
                         <option value="1º 2">1º 2</option>
@@ -118,135 +142,120 @@
                         <option value="1º 5">1º 5</option>
                         <option value="1º 6">1º 6</option>
                     </select>
-                    <select id="student-shift" class="input-dark w-full p-4 rounded-xl appearance-none">
+                    <select id="student-shift" class="input-dark w-full p-4 rounded-xl appearance-none text-sm">
                         <option value="" disabled selected>Turno</option>
-                        <option value="TM">Turno Mañana</option>
-                        <option value="TT">Turno Tarde</option>
+                        <option value="TM">Mañana</option>
+                        <option value="TT">Tarde</option>
                     </select>
                 </div>
-                <button onclick="login()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-bold py-4 rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-cyan-500/20">
-                    Iniciar Misión
+
+                <button onclick="login()" class="w-full bg-cyan-500 hover:bg-cyan-400 text-black font-black py-4 rounded-xl transition-all uppercase tracking-widest shadow-lg shadow-cyan-500/20 text-sm">
+                    Acceso Biométrico
                 </button>
+
+                <div class="pt-6 border-t border-white/5">
+                    <button onclick="toggleAdmin()" class="text-slate-500 hover:text-cyan-400 text-[10px] uppercase font-bold tracking-widest transition-colors">
+                        <i class="fas fa-lock mr-2"></i> Acceso Docente
+                    </button>
+                </div>
             </div>
-            <p class="mt-6 text-[10px] text-slate-500 uppercase tracking-widest">Protocolo de Educación Tecnológica</p>
         </div>
     </div>
 
-    <!-- Interfaz Principal -->
-    <nav class="sticky top-0 z-50 glass-panel px-6 py-4 border-b border-white/10">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="bg-cyan-600 p-2 rounded-lg text-white">
-                    <i class="fas fa-tools"></i>
-                </div>
-                <div>
-                    <h1 class="text-sm font-bold tracking-widest uppercase">Proyecto <span class="text-cyan-400">La Percha</span></h1>
-                    <p id="display-user" class="text-[10px] text-slate-400 italic font-mono">ID: Sin identificar</p>
-                </div>
-            </div>
-            
-            <div class="flex items-center gap-6">
-                <div class="hidden md:flex flex-col items-end">
-                    <span class="text-[10px] text-slate-500 font-bold uppercase">Progreso del Ciclo</span>
-                    <div class="w-32 bg-white/5 h-1.5 rounded-full mt-1 overflow-hidden">
-                        <div id="xp-bar" class="bg-cyan-400 h-full transition-all duration-1000" style="width: 0%"></div>
-                    </div>
-                </div>
-                <button onclick="toggleAdmin()" class="text-slate-500 hover:text-cyan-400 transition-colors" title="Modo Docente">
-                    <i class="fas fa-user-shield"></i>
-                </button>
-                <div class="bg-cyan-400/10 text-cyan-400 px-4 py-2 rounded-xl border border-cyan-400/30 font-mono text-sm">
-                    <span id="xp-counter">0000</span> XP
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="container mx-auto px-4 py-12">
-        <header class="text-center mb-16">
-            <h2 class="text-5xl font-black mb-4 uppercase tracking-tighter">Laboratorio <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Maker</span></h2>
-            <p class="text-slate-400 max-w-2xl mx-auto">Sigue las fases del proceso tecnológico. Consulta con tu agente de IA para obtener datos precisos y documenta tu trabajo.</p>
-        </header>
-
-        <!-- Cuadrícula de Fases -->
-        <div id="phases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-            <!-- Dinámico -->
-        </div>
-
-        <!-- Área de Trabajo de Misión -->
-        <div id="mission-area" class="hidden glass-panel rounded-3xl p-8 md:p-12 border border-cyan-400/30 mb-20">
-            <div class="flex flex-col lg:flex-row gap-12">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span id="mission-step" class="text-cyan-400 font-mono text-xs font-bold px-3 py-1 bg-cyan-400/10 rounded-full border border-cyan-400/20">FASE_XX</span>
-                    </div>
-                    <h4 id="mission-title" class="text-3xl font-bold mb-6 text-white uppercase italic tracking-tight underline decoration-cyan-500/30">Título</h4>
-                    <div id="mission-content" class="text-slate-300 space-y-4 mb-8 leading-relaxed text-lg"></div>
-                    
-                    <!-- Comando IA -->
-                    <div class="bg-black/60 rounded-2xl p-6 border border-white/5 mb-8">
-                        <div class="flex justify-between items-center mb-4">
-                            <h5 class="text-cyan-400 text-xs font-bold uppercase tracking-widest"><i class="fas fa-robot mr-2"></i> Orden para tu Agente IA</h5>
-                            <button onclick="copyPrompt()" class="text-[10px] bg-white/5 hover:bg-cyan-400 hover:text-black px-4 py-1 rounded-lg transition-all border border-white/10 uppercase font-bold">Copiar Comando</button>
-                        </div>
-                        <p id="mission-prompt" class="font-mono text-sm italic text-slate-400 p-2"></p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <label class="text-xs font-bold text-slate-500 uppercase tracking-widest">Documentación Técnica</label>
-                        <textarea id="user-input" class="w-full input-dark rounded-2xl p-6 h-48 focus:ring-2 ring-cyan-500/50" placeholder="Registra aquí los resultados de tu investigación o el detalle de tu proceso..."></textarea>
-                        <button onclick="submitPhase()" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black py-5 rounded-2xl transition-all shadow-xl text-xl uppercase tracking-tighter">
-                            Validar y Guardar Avance
-                        </button>
-                    </div>
-                </div>
-
-                <div class="w-full lg:w-80 flex flex-col items-center justify-start gap-8">
-                    <div id="mission-icon" class="w-40 h-40 rounded-full bg-cyan-500/10 flex items-center justify-center text-7xl text-cyan-400 border border-cyan-500/20 shadow-[0_0_30px_rgba(0,242,255,0.15)]">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <div class="text-center bg-white/5 w-full p-6 rounded-3xl border border-white/5">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold mb-1">Recompensa</p>
-                        <h6 id="xp-reward" class="text-4xl font-black text-white">+0 XP</h6>
-                        <span id="badge-name" class="text-[10px] bg-purple-500/20 text-purple-400 px-4 py-1 rounded-full border border-purple-500/30 inline-block mt-3 font-bold tracking-widest uppercase">RECONOCIMIENTO</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Panel de Administración -->
-    <div id="admin-modal" class="fixed inset-0 z-[300] hidden bg-black/98 flex items-center justify-center p-4 backdrop-blur-2xl">
-        <div class="glass-panel w-full max-w-6xl rounded-3xl p-10 max-h-[90vh] overflow-hidden flex flex-col border-cyan-500/20">
-            <div class="flex justify-between items-center mb-8">
+    <!-- Interfaz Principal (Oculta al inicio) -->
+    <div id="main-ui" class="hidden">
+        <nav class="sticky top-0 z-50 glass-panel px-6 py-4 border-b border-white/10">
+            <div class="container mx-auto flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-cyan-500 flex items-center justify-center rounded-lg text-black"><i class="fas fa-shield-alt"></i></div>
-                    <h3 class="text-2xl font-bold text-white uppercase tracking-tighter">Monitor de Clase - Profesor</h3>
-                </div>
-                <button onclick="toggleAdmin()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-2xl"></i></button>
-            </div>
-
-            <div id="admin-auth" class="text-center py-24">
-                <p class="mb-6 text-slate-400 uppercase tracking-widest text-xs">Clave de Acceso Docente</p>
-                <input type="password" id="admin-pass" class="input-dark text-center text-4xl p-6 w-64 tracking-[0.5em] font-bold rounded-2xl" maxlength="4" placeholder="****">
-                <button onclick="checkAdmin()" class="block mx-auto mt-8 px-12 py-4 bg-cyan-500 hover:bg-cyan-400 text-black font-black rounded-xl transition-all uppercase">Ingresar al Sistema</button>
-            </div>
-
-            <div id="admin-dashboard" class="hidden overflow-y-auto custom-scrollbar flex-1">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10">
-                    <div class="bg-white/5 p-6 rounded-2xl border border-white/5 text-center">
-                        <span class="text-[10px] text-slate-500 uppercase font-bold">Total Entregas</span>
-                        <p id="total-done" class="text-4xl font-black text-cyan-400">0</p>
+                    <div class="bg-cyan-600 p-2 rounded-lg text-white">
+                        <i class="fas fa-satellite-dish"></i>
                     </div>
-                    <div class="bg-white/5 p-6 rounded-2xl border border-white/5 text-center">
-                        <span class="text-[10px] text-slate-500 uppercase font-bold">Alumnos Activos</span>
-                        <p id="total-students" class="text-4xl font-black text-purple-400">0</p>
+                    <div>
+                        <h1 class="text-xs font-bold tracking-widest uppercase">Misión: <span class="text-cyan-400 italic">La Percha Maker</span></h1>
+                        <p id="display-user" class="text-[9px] text-slate-400 italic font-mono uppercase">ID_CLOUD: OFFLINE</p>
                     </div>
                 </div>
                 
-                <div id="admin-log" class="space-y-12 pb-10">
-                    <!-- Respuestas agrupadas aquí -->
+                <div class="flex items-center gap-4">
+                    <div class="bg-cyan-400/10 text-cyan-400 px-4 py-2 rounded-xl border border-cyan-400/30 font-mono text-sm">
+                        <span id="xp-counter">0000</span> XP
+                    </div>
                 </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto px-4 py-12">
+            <header class="text-center mb-16">
+                <h2 class="text-4xl font-black mb-4 uppercase tracking-tighter">Fases de <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Producción</span></h2>
+                <div id="progress-container" class="max-w-xs mx-auto mb-4">
+                    <div class="flex justify-between text-[10px] uppercase font-bold text-slate-500 mb-1">
+                        <span>Sincronización</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <div id="xp-bar" class="bg-cyan-400 h-full transition-all duration-700" style="width: 0%"></div>
+                    </div>
+                </div>
+            </header>
+
+            <div id="phases-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20"></div>
+
+            <div id="mission-area" class="hidden glass-panel rounded-3xl p-8 md:p-12 border border-cyan-400/30 mb-20">
+                <div class="flex flex-col lg:flex-row gap-12">
+                    <div class="flex-1">
+                        <span id="mission-step" class="text-cyan-400 font-mono text-[10px] font-bold px-3 py-1 bg-cyan-400/10 rounded-full border border-cyan-400/20 mb-4 inline-block">FASE_XX</span>
+                        <h4 id="mission-title" class="text-3xl font-bold mb-6 text-white uppercase italic">Título</h4>
+                        <div id="mission-content" class="text-slate-300 space-y-4 mb-8 text-base"></div>
+                        
+                        <div class="bg-black/60 rounded-2xl p-6 border border-white/5 mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h5 class="text-cyan-400 text-[10px] font-bold uppercase tracking-widest"><i class="fas fa-robot mr-2"></i> Instrucción para IA</h5>
+                                <button onclick="copyPrompt()" class="text-[9px] bg-white/5 hover:bg-cyan-400 hover:text-black px-3 py-1 rounded-lg transition-all uppercase font-bold">Copiar</button>
+                            </div>
+                            <p id="mission-prompt" class="font-mono text-xs italic text-slate-400"></p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <textarea id="user-input" class="w-full input-dark rounded-2xl p-6 h-48 text-sm" placeholder="Documenta tu avance aquí para guardarlo en la nube..."></textarea>
+                            <button onclick="submitPhase()" id="submit-btn" class="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-black py-4 rounded-xl transition-all text-sm uppercase">
+                                Guardar en la Nube
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Panel de Administración -->
+    <div id="admin-modal" class="fixed inset-0 z-[300] hidden bg-black/98 flex items-center justify-center p-4 backdrop-blur-2xl">
+        <div class="glass-panel w-full max-w-5xl rounded-3xl p-8 max-h-[90vh] overflow-hidden flex flex-col border-cyan-500/20">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="text-xl font-bold text-white uppercase tracking-widest flex items-center gap-3">
+                    <i class="fas fa-id-badge text-cyan-400"></i> Central de Monitoreo
+                </h3>
+                <button onclick="toggleAdmin()" class="text-slate-500 hover:text-white"><i class="fas fa-times text-xl"></i></button>
+            </div>
+
+            <div id="admin-auth" class="text-center py-20">
+                <p class="mb-4 text-slate-400 uppercase tracking-widest text-[10px]">Ingresar Credencial Maestro</p>
+                <input type="password" id="admin-pass" class="input-dark text-center text-3xl p-4 w-48 font-bold rounded-xl" maxlength="4" placeholder="••••">
+                <button onclick="checkAdmin()" class="block mx-auto mt-6 px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold rounded-lg transition-all uppercase text-xs">Desbloquear</button>
+            </div>
+
+            <div id="admin-dashboard" class="hidden overflow-y-auto custom-scrollbar flex-1 pr-2">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
+                        <span class="text-[9px] text-slate-500 uppercase font-bold">Respuestas</span>
+                        <p id="total-done" class="text-2xl font-black text-cyan-400">0</p>
+                    </div>
+                    <div class="bg-white/5 p-4 rounded-xl border border-white/5 text-center">
+                        <span class="text-[9px] text-slate-500 uppercase font-bold">Cursos</span>
+                        <p id="total-courses" class="text-2xl font-black text-purple-400">0</p>
+                    </div>
+                </div>
+                
+                <div id="admin-log" class="space-y-8 pb-6"></div>
             </div>
         </div>
     </div>
@@ -254,132 +263,84 @@
     <script>
         const DOCENTE_KEY = "1304";
         let user = null;
-        let database = []; // Simulación de base de datos local
+        let globalData = [];
 
         const phaseData = [
-            {
-                step: "FASE_01",
-                title: "Necesidad y Análisis",
-                content: "Investiga por qué se caen los abrigos en el club y analiza una percha común. ¿Qué materiales fallan más?",
-                prompt: "IA, actúa como un experto en análisis de productos. ¿Cuáles son las 3 debilidades más comunes de una percha de plástico y por qué el cartón podría ser mejor?",
-                reward: 100,
-                badge: "INVESTIGADOR",
-                icon: "fa-search",
-                color: "rose"
-            },
-            {
-                step: "FASE_02",
-                title: "Diseño y Bocetado",
-                content: "Dibuja tu idea. ¿Cómo vas a reforzar los hombros de la percha usando solo material de descarte?",
-                prompt: "IA, actúa como diseñador industrial. Sugiere 3 formas creativas de reforzar una percha hecha de cartón corrugado para que no se doble.",
-                reward: 150,
-                badge: "CREATIVO",
-                icon: "fa-pencil-ruler",
-                color: "cyan"
-            },
-            {
-                step: "FASE_03",
-                title: "Plan de Trabajo",
-                content: "Haz la lista de materiales (Entradas) y organiza los pasos de fabricación (Proceso).",
-                prompt: "IA, ayúdame a organizar un diagrama de bloques para fabricar una percha. Divide el proceso en: Corte, Plegado, Refuerzo y Acabado.",
-                reward: 200,
-                badge: "ORGANIZADOR",
-                icon: "fa-list-ol",
-                color: "amber"
-            },
-            {
-                step: "FASE_04",
-                title: "Producción",
-                content: "Describe cómo fue armar tu prototipo. ¿Qué herramientas usaste y qué problemas tuviste?",
-                prompt: "IA, estoy construyendo mi percha y las piezas se sueltan. ¿Qué técnica de encastre mecánico puedo usar si no tengo pegamento fuerte?",
-                reward: 250,
-                badge: "MAESTRO MAKER",
-                icon: "fa-hammer",
-                color: "emerald"
-            },
-            {
-                step: "FASE_05",
-                title: "Evaluación Técnica",
-                content: "Prueba tu percha con peso. Escribe tus Fortalezas (qué salió bien) y tus Debilidades (qué se rompió).",
-                prompt: "IA, ayúdame a evaluar mi proyecto. Mi percha de cartón resiste bien el peso pero se resbala la ropa. ¿Qué solución sustentable me sugieres?",
-                reward: 150,
-                badge: "AUDITOR",
-                icon: "fa-vial",
-                color: "purple"
-            },
-            {
-                step: "FASE_06",
-                title: "Comunicación",
-                content: "Crea una marca para tu percha y un eslogan que convenza a la escuela de usar productos reciclados.",
-                prompt: "IA, actúa como experto en marketing ecológico. Crea un nombre original y 2 eslóganes cortos para vender mi percha de cartón reciclado.",
-                reward: 150,
-                badge: "PUBLICISTA",
-                icon: "fa-bullhorn",
-                color: "blue"
-            }
+            { step: "FASE_01", title: "Necesidad", content: "Analiza por qué faltan perchas y qué materiales reciclables podrías usar.", prompt: "IA, como experto tecnológico, ¿qué ventajas tiene el cartón corrugado sobre el plástico para una percha casera?", reward: 100, icon: "fa-search", color: "rose" },
+            { step: "FASE_02", title: "Diseño", content: "Dibuja tu diseño. ¿Cómo evitarás que la ropa se resbale?", prompt: "IA, sugiere 3 métodos para que una percha de cartón sea antideslizante usando materiales comunes.", reward: 150, icon: "fa-pencil-ruler", color: "cyan" },
+            { step: "FASE_03", title: "Gestión", content: "Haz el listado de materiales y los pasos del proceso.", prompt: "IA, arma un diagrama de bloques para fabricar una percha: desde la materia prima hasta el acabado final.", reward: 200, icon: "fa-list-ol", color: "amber" },
+            { step: "FASE_04", title: "Ejecución", content: "Construye tu percha. ¿Qué herramientas usaste?", prompt: "IA, si no tengo pegamento, ¿qué tipo de encastres puedo hacer en cartón para que la percha no se desarme?", reward: 250, icon: "fa-hammer", color: "emerald" },
+            { step: "FASE_05", title: "Evaluación", content: "Prueba el peso. ¿Qué salió bien y qué falló?", prompt: "IA, mi percha se dobla con un abrigo pesado. ¿Cómo puedo reforzar la estructura sin añadir mucho peso?", reward: 150, icon: "fa-vial", color: "purple" },
+            { step: "FASE_06", title: "Venta", content: "Crea un nombre y eslogan para tu invento.", prompt: "IA, crea un nombre pegadizo y un eslogan para mi marca de perchas ecológicas hechas por alumnos.", reward: 150, icon: "fa-bullhorn", color: "blue" }
         ];
 
-        function login() {
+        async function login() {
             const name = document.getElementById('student-name').value.trim();
             const surname = document.getElementById('student-surname').value.trim();
             const course = document.getElementById('student-course').value;
             const shift = document.getElementById('student-shift').value;
             
             if (!name || !surname || !course || !shift) {
-                alert("Completa todos tus datos para iniciar la misión.");
+                alert("Completa todos los datos Operario.");
                 return;
             }
 
-            const userId = `${name}_${surname}_${course}_${shift}`.toLowerCase();
-            
             user = { 
-                id: userId,
-                name, 
-                surname, 
-                course: `${course} ${shift}`, 
-                xp: 0, 
-                unlocked: 1 
+                id: `${name}_${surname}_${course}_${shift}`.toLowerCase().replace(/\s/g, '_'),
+                name, surname, course: `${course} ${shift}`, xp: 0, unlocked: 1 
             };
-            
-            database = database.filter(entry => entry.studentId !== userId);
 
-            document.getElementById('display-user').innerText = `Agente: ${name} ${surname} | ${user.course}`;
+            // Mostrar UI principal
+            document.getElementById('display-user').innerText = `ID_CLOUD: ${user.name} ${user.surname} | ${user.course}`;
             document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-ui').classList.remove('hidden');
+            
             renderCards();
-            updateStats();
+            loadUserData(); // Intentar cargar progreso previo si existe en Firebase
+        }
+
+        async function loadUserData() {
+            // Sincronizar con Firebase
+            if (!window.db) return;
+            const q = window.query(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas'));
+            
+            window.onSnapshot(q, (snapshot) => {
+                const entries = snapshot.docs.map(doc => doc.data());
+                globalData = entries;
+                
+                // Buscar progreso del usuario actual
+                const userEntries = entries.filter(e => e.studentId === user.id);
+                if (userEntries.length > 0) {
+                    user.unlocked = Math.max(...userEntries.map(e => e.phase)) + 1;
+                    user.xp = userEntries.reduce((acc, curr) => acc + curr.reward, 0);
+                    updateStats();
+                    renderCards();
+                }
+            });
         }
 
         function renderCards() {
             const grid = document.getElementById('phases-grid');
             grid.innerHTML = "";
-            
             phaseData.forEach((data, index) => {
                 const phaseNum = index + 1;
                 const isLocked = phaseNum > user.unlocked;
                 const isDone = phaseNum < user.unlocked;
-                
                 const card = document.createElement('div');
-                card.className = `phase-card glass-panel p-8 rounded-3xl border border-white/5 cursor-pointer flex flex-col justify-between ${isLocked ? 'locked' : ''}`;
+                card.className = `phase-card glass-panel p-6 rounded-2xl border border-white/5 cursor-pointer flex flex-col justify-between ${isLocked ? 'locked' : ''}`;
                 card.onclick = () => openPhase(index);
-                
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-6">
-                            <div class="w-14 h-14 bg-${data.color}-500/10 rounded-2xl flex items-center justify-center text-${data.color}-400 border border-${data.color}-500/20 shadow-lg">
-                                <i class="fas ${data.icon} text-2xl"></i>
-                            </div>
-                            <span class="text-[10px] font-bold text-slate-600 font-mono tracking-widest">${data.step}</span>
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-10 h-10 bg-${data.color}-500/10 rounded-xl flex items-center justify-center text-${data.color}-400 border border-${data.color}-500/20"><i class="fas ${data.icon}"></i></div>
+                            <span class="text-[9px] font-mono text-slate-600">${data.step}</span>
                         </div>
-                        <h3 class="text-xl font-bold mb-3 text-white uppercase italic">${data.title}</h3>
-                        <p class="text-slate-500 text-xs leading-relaxed">${data.content}</p>
+                        <h3 class="text-sm font-bold text-white uppercase">${data.title}</h3>
                     </div>
-                    <div class="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                        ${isDone ? 
-                            '<span class="text-[10px] font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full"><i class="fas fa-check-double mr-1"></i> VALIDADO</span>' : 
-                            (isLocked ? '<span class="text-[10px] font-bold text-slate-700 uppercase"><i class="fas fa-lock mr-1"></i> Bloqueado</span>' : 
-                            '<span class="text-[10px] font-bold text-cyan-400 status-active uppercase tracking-widest">En Curso</span>')
-                        }
-                        <span class="text-[10px] text-slate-500 font-mono">${data.reward} XP</span>
+                    <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+                        <span class="text-[9px] font-bold ${isDone ? 'text-emerald-400' : 'text-cyan-400'} uppercase">
+                            ${isDone ? 'Completado' : (isLocked ? 'Cerrado' : 'Disponible')}
+                        </span>
                     </div>
                 `;
                 grid.appendChild(card);
@@ -393,62 +354,64 @@
             document.getElementById('mission-title').innerText = data.title;
             document.getElementById('mission-content').innerText = data.content;
             document.getElementById('mission-prompt').innerText = `"${data.prompt}"`;
-            document.getElementById('xp-reward').innerText = `+${data.reward} XP`;
-            document.getElementById('badge-name').innerText = data.badge;
-            document.getElementById('mission-icon').innerHTML = `<i class="fas ${data.icon}"></i>`;
             document.getElementById('user-input').value = "";
-            
-            window.scrollTo({ top: document.getElementById('mission-area').offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo({ top: document.getElementById('mission-area').offsetTop - 50, behavior: 'smooth' });
         }
 
-        function submitPhase() {
+        async function submitPhase() {
             const input = document.getElementById('user-input').value.trim();
-            if (input.length < 25) {
-                alert("La documentación es muy corta. ¡Necesitamos más detalles técnicos!");
-                return;
-            }
-
+            if (input.length < 15) { alert("Respuesta muy corta."); return; }
+            
             const currentIdx = user.unlocked - 1;
             const data = phaseData[currentIdx];
-            
-            database.unshift({
-                studentId: user.id,
-                student: `${user.name} ${user.surname}`,
-                course: user.course,
-                phase: currentIdx + 1,
-                phaseTitle: data.title,
-                text: input,
-                time: new Date().toLocaleTimeString(),
-                status: "Auto-Validado"
-            });
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerText = "Sincronizando...";
 
-            user.xp += data.reward;
-            user.unlocked++;
+            try {
+                // GUARDAR EN FIRESTORE (REGLA 1: /artifacts/{appId}/public/data/{collection})
+                const docId = `${user.id}_fase_${user.unlocked}`;
+                await window.setDoc(window.doc(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas', docId), {
+                    studentId: user.id,
+                    student: `${user.name} ${user.surname}`,
+                    course: user.course,
+                    phase: user.unlocked,
+                    phaseTitle: data.title,
+                    text: input,
+                    reward: data.reward,
+                    timestamp: Date.now()
+                });
 
-            alert(`✅ Fase ${data.step} completada.\nHas ganado ${data.reward} XP y la insignia de ${data.badge}.`);
-            document.getElementById('mission-area').classList.add('hidden');
-            renderCards();
-            updateStats();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+                user.unlocked++;
+                user.xp += data.reward;
+                updateStats();
+                renderCards();
+                document.getElementById('mission-area').classList.add('hidden');
+                alert("¡Fase guardada en la nube con éxito!");
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar. Reintenta.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Guardar en la Nube";
+            }
         }
 
         function updateStats() {
             document.getElementById('xp-counter').innerText = String(user.xp).padStart(4, '0');
-            const progress = ((user.unlocked - 1) / 6) * 100;
-            document.getElementById('xp-bar').style.width = `${progress}%`;
+            const percent = Math.round(((user.unlocked - 1) / 6) * 100);
+            document.getElementById('xp-bar').style.width = `${percent}%`;
+            document.getElementById('progress-percent').innerText = `${percent}%`;
         }
 
         function copyPrompt() {
             const text = document.getElementById('mission-prompt').innerText.replace(/"/g, '');
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Comando copiado. ¡Pégalo en el chat de tu IA!");
-            });
+            navigator.clipboard.writeText(text);
+            alert("Copiado.");
         }
 
         function toggleAdmin() {
             document.getElementById('admin-modal').classList.toggle('hidden');
-            document.getElementById('admin-auth').classList.remove('hidden');
-            document.getElementById('admin-dashboard').classList.add('hidden');
             document.getElementById('admin-pass').value = "";
         }
 
@@ -456,66 +419,51 @@
             if (document.getElementById('admin-pass').value === DOCENTE_KEY) {
                 document.getElementById('admin-auth').classList.add('hidden');
                 document.getElementById('admin-dashboard').classList.remove('hidden');
-                renderAdminLog();
-            } else {
-                alert("Acceso Denegado.");
-            }
+                startAdminMonitoring();
+            } else { alert("Clave Incorrecta."); }
         }
 
-        function renderAdminLog() {
+        function startAdminMonitoring() {
+            // Sincronización en tiempo real para el docente (REGLA 2: Consultas simples)
+            const q = window.query(window.collection(window.db, 'artifacts', window.appId, 'public', 'data', 'entregas'));
+            window.onSnapshot(q, (snapshot) => {
+                const data = snapshot.docs.map(doc => doc.data());
+                renderAdminLog(data);
+            }, (error) => console.error("Error Firestore:", error));
+        }
+
+        function renderAdminLog(data) {
             const log = document.getElementById('admin-log');
-            document.getElementById('total-done').innerText = database.length;
-            const uniqueStudents = [...new Set(database.map(d => d.studentId))].length;
-            document.getElementById('total-students').innerText = uniqueStudents;
+            document.getElementById('total-done').innerText = data.length;
+            
+            const courses = [...new Set(data.map(d => d.course))];
+            document.getElementById('total-courses').innerText = courses.length;
 
             log.innerHTML = "";
-            if (database.length === 0) {
-                log.innerHTML = '<p class="text-slate-500 italic text-center py-20 border-2 border-dashed border-white/5 rounded-3xl uppercase tracking-widest">Sin actividad registrada</p>';
-                return;
-            }
+            const sortedCourses = courses.sort();
 
-            const courseGroups = {};
-            database.forEach(entry => {
-                if (!courseGroups[entry.course]) courseGroups[entry.course] = [];
-                courseGroups[entry.course].push(entry);
-            });
-
-            Object.keys(courseGroups).sort().forEach(course => {
+            sortedCourses.forEach(c => {
                 const section = document.createElement('div');
-                section.innerHTML = `<div class="flex items-center gap-4 mb-6"><span class="bg-cyan-500 text-black px-4 py-1 rounded-full text-xs font-black">${course}</span><div class="h-px bg-cyan-500/20 flex-1"></div></div>`;
+                section.innerHTML = `<div class="sticky top-0 bg-black/80 backdrop-blur py-2 z-10 border-b border-cyan-500/30 mb-4"><h4 class="text-cyan-400 font-black text-xs uppercase italic">${c}</h4></div>`;
                 
                 const grid = document.createElement('div');
-                grid.className = "grid grid-cols-1 gap-4";
+                grid.className = "space-y-3";
 
-                courseGroups[course].forEach((entry, idx) => {
+                data.filter(d => d.course === c).sort((a,b) => b.timestamp - a.timestamp).forEach(entry => {
                     const row = document.createElement('div');
-                    row.className = "bg-white/5 p-6 rounded-2xl border border-white/5 hover:border-cyan-500/30 transition-all";
+                    row.className = "bg-white/5 p-4 rounded-xl border border-white/5";
                     row.innerHTML = `
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                            <div>
-                                <h5 class="font-bold text-white text-lg">${entry.student}</h5>
-                                <span class="text-[10px] text-cyan-400 font-mono uppercase">Fase ${entry.phase}: ${entry.phaseTitle} | ${entry.time}</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <select onchange="updateStatus(${idx}, this.value)" class="bg-black/40 text-[10px] font-bold border border-white/10 rounded-lg p-2 outline-none">
-                                    <option value="Auto-Validado" ${entry.status === 'Auto-Validado' ? 'selected' : ''}>Auto-Validado</option>
-                                    <option value="Aprobado" ${entry.status === 'Aprobado' ? 'selected' : ''}>Aprobado ✅</option>
-                                    <option value="Rehacer" ${entry.status === 'Rehacer' ? 'selected' : ''}>Rehacer ❌</option>
-                                </select>
-                            </div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-white">${entry.student}</span>
+                            <span class="text-[8px] bg-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded uppercase font-bold">Fase ${entry.phase}</span>
                         </div>
-                        <p class="text-slate-400 text-sm italic bg-black/40 p-4 rounded-xl border-l-4 border-cyan-500 font-mono leading-relaxed">"${entry.text}"</p>
+                        <p class="text-[11px] text-slate-400 italic font-mono leading-tight">"${entry.text}"</p>
                     `;
                     grid.appendChild(row);
                 });
                 section.appendChild(grid);
                 log.appendChild(section);
             });
-        }
-
-        function updateStatus(idx, status) {
-            database[idx].status = status;
-            alert("Estado actualizado manualmente.");
         }
     </script>
 </body>
